@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+// 1. Import your ThemeProvider
+import { ThemeProvider } from "./components/theme-provider"; // Ensure this path matches where you saved providers.tsx
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,11 +25,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    // 2. Add suppressHydrationWarning to html tag to prevent errors from next-themes
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        {/* 3. Wrap everything in ThemeProvider with dark mode default */}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
