@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./components/theme-provider";
-import { FloatingDock } from "./components/floating-dock";
+import { FloatingDock } from "./components/floating-nav";
 import { 
   IconHome, 
   IconCalendarEvent, 
@@ -40,7 +40,7 @@ export default function RootLayout({
     { 
       title: "About Us", 
       icon: <IconMessageCode className="h-full w-full text-neutral-500 dark:text-neutral-300" />, 
-      href: "#" 
+      href: "/about" 
     },
     { 
       title: "Events", 
@@ -50,12 +50,12 @@ export default function RootLayout({
     { 
       title: "Team", 
       icon: <IconBriefcase className="h-full w-full text-neutral-500 dark:text-neutral-300" />, 
-      href: "#" 
+      href: "/team" 
     },
     { 
       title: "Projects", 
       icon: <IconMessageCode className="h-full w-full text-neutral-500 dark:text-neutral-300" />, 
-      href: "#" 
+      href: "/projects" 
     },
   ];
 
@@ -66,7 +66,9 @@ export default function RootLayout({
             <div className="pointer-events-auto">
               <FloatingDock
                 items={navItems}
-                desktopClassName="bg-black/40 backdrop-blur-lg border border-white/10 shadow-2xl"
+                // This makes the long bar background transparent
+                desktopClassName="bg-transparent border-none shadow-none" 
+                mobileClassName="fixed bottom-4 left-4" 
               />
             </div>
           </div>

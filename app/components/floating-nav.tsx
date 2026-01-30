@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useRef, useState } from "react";
-import { cn } from "./../lib/utils";
+import { cn } from "../lib/utils";
 import { IconLayoutNavbarCollapse } from "@tabler/icons-react";
 import {
   AnimatePresence,
@@ -85,7 +85,6 @@ const FloatingDockDesktop = ({
   items: { title: string; icon: React.ReactNode; href: string }[];
   className?: string;
 }) => {
-  // Use clientY to track mouse relative to the visible screen only
   let mouseY = useMotionValue(Infinity);
 
   return (
@@ -93,7 +92,7 @@ const FloatingDockDesktop = ({
       onMouseMove={(e) => mouseY.set(e.clientY)}
       onMouseLeave={() => mouseY.set(Infinity)}
       className={cn(
-        "hidden w-16 flex-col items-center gap-4 rounded-2xl bg-gray-50 px-3 py-4 dark:bg-neutral-900 md:flex",
+        "hidden w-16 flex-col items-center gap-4 rounded-2xl px-3 py-4 md:flex",
         className
       )}
     >
@@ -118,23 +117,17 @@ function IconContainer({
   let ref = useRef<HTMLDivElement>(null);
 
   let distance = useTransform(mouseY, (val) => {
-    // getBoundingClientRect() provides coordinates relative to the viewport
     let bounds = ref.current?.getBoundingClientRect() ?? { y: 0, height: 0 };
-
-    // Since we are using clientY and getBoundingClientRect, 
-    // the calculation is scroll-independent.
     return val - bounds.y - bounds.height / 2;
   });
 
   let widthTransform = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
   let heightTransform = useTransform(distance, [-150, 0, 150], [40, 80, 40]);
-
   let widthTransformIcon = useTransform(distance, [-150, 0, 150], [20, 40, 20]);
   let heightTransformIcon = useTransform(distance, [-150, 0, 150], [20, 40, 20]);
 
   let width = useSpring(widthTransform, { mass: 0.1, stiffness: 150, damping: 12 });
   let height = useSpring(heightTransform, { mass: 0.1, stiffness: 150, damping: 12 });
-
   let widthIcon = useSpring(widthTransformIcon, { mass: 0.1, stiffness: 150, damping: 12 });
   let heightIcon = useSpring(heightTransformIcon, { mass: 0.1, stiffness: 150, damping: 12 });
 
@@ -147,7 +140,8 @@ function IconContainer({
         style={{ width, height }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative flex aspect-square items-center justify-center rounded-full bg-gray-200 dark:bg-neutral-800"
+        // These are NOT transparent - they are solid circles
+        className="relative flex aspect-square items-center justify-center rounded-full bg-gray-200 dark:bg-neutral-800 shadow-lg border border-white/5"
       >
         <AnimatePresence>
           {hovered && (
@@ -155,7 +149,7 @@ function IconContainer({
               initial={{ opacity: 0, x: 10, y: "-50%" }}
               animate={{ opacity: 1, x: 0, y: "-50%" }}
               exit={{ opacity: 0, x: 10, y: "-50%" }}
-              className="absolute left-full ml-4 top-1/2 w-fit -translate-y-1/2 rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs whitespace-pre text-neutral-700 dark:border-neutral-900 dark:bg-neutral-800 dark:text-white"
+              className="absolute left-full ml-4 top-1/2 w-fit -translate-y-1/2 rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs whitespace-pre text-neutral-700 dark:border-neutral-900 dark:bg-neutral-800 dark:text-white shadow-xl"
             >
               {title}
             </motion.div>
