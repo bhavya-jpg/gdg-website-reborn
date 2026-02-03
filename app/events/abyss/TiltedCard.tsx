@@ -64,9 +64,9 @@ export default function TiltedCard({
     const checkMobile = () => {
       setIsMobile(window.matchMedia("(max-width: 768px)").matches);
     };
-    
+
     checkMobile();
-    
+
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
@@ -110,7 +110,7 @@ export default function TiltedCard({
   return (
     <figure
       ref={ref}
-      className="relative w-full h-full [perspective:800px] flex flex-col items-center justify-center cursor-pointer"
+      className="group/card relative w-full h-full [perspective:800px] flex flex-col items-center justify-center cursor-pointer transition-all duration-500"
       style={{
         height: containerHeight,
         width: containerWidth,
@@ -135,13 +135,42 @@ export default function TiltedCard({
         whileTap={isMobile ? { scale: 0.98 } : {}}
         transition={{ duration: 0.15 }}
       >
+        {/* Dark Glass Overlay - lets background bleed through */}
+        <motion.div
+          className="absolute inset-0 rounded-[15px] z-[1] pointer-events-none"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.4) 100%)',
+            backdropFilter: 'blur(0.5px)',
+          }}
+        />
+
+        {/* Soft inner glow border */}
+        <motion.div
+          className="absolute inset-0 rounded-[15px] z-[1] pointer-events-none opacity-70 group-hover/card:opacity-100 transition-opacity duration-500"
+          style={{
+            boxShadow: 'inset 0 0 20px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05)',
+          }}
+        />
+
         <motion.img
           src={imageSrc}
           alt={altText}
-          className="absolute top-0 left-0 object-cover rounded-[15px] will-change-transform [transform:translateZ(0)] shadow-[0_0_30px_rgba(0,0,0,0.5)] border border-white/10"
+          className="absolute top-0 left-0 object-cover rounded-[15px] will-change-transform [transform:translateZ(0)] transition-all duration-500 ease-out
+                     grayscale-[30%] group-hover/card:grayscale-0 
+                     brightness-[0.85] group-hover/card:brightness-100
+                     contrast-[1.05]"
           style={{
             width: imageWidth,
             height: imageHeight,
+            boxShadow: '0 4px 30px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03)',
+          }}
+        />
+
+        {/* Hover glow effect */}
+        <motion.div
+          className="absolute inset-0 rounded-[15px] z-[0] pointer-events-none opacity-0 group-hover/card:opacity-100 transition-opacity duration-500"
+          style={{
+            boxShadow: '0 0 40px rgba(180, 30, 30, 0.2), 0 0 80px rgba(100, 0, 0, 0.15)',
           }}
         />
 

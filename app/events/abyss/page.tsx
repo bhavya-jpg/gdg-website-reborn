@@ -8,7 +8,7 @@ import TiltedCard from './TiltedCard';
 
 // --- Font Configuration ---
 const geizer = localFont({
-  src: './fonts/Geizer.otf', 
+  src: './fonts/Geizer.otf',
   display: 'swap',
   variable: '--font-geizer',
 });
@@ -88,7 +88,7 @@ const games: Game[] = [
     gameOver: "Rejected (Social Exile)",
     image: "https://i.postimg.cc/13MZyrrS/Gemini-Generated-Image-3x7q1a3x7q1a3x7q.png"
   },
- {
+  {
     id: 4,
     title: "Escape Room",
     suit: "spades",
@@ -185,23 +185,47 @@ const games: Game[] = [
 // --- Helpers ---
 
 const getSuitColor = (suit: Suit) => {
-    switch (suit) {
-        case "hearts": return "#DC2626"; // Red
-        case "diamonds": return "#FBBC04"; // Gold/Yellow
-        case "spades": return "#4285F4"; // Blue
-        case "clubs": return "#34A853"; // Green
-    }
+  switch (suit) {
+    case "hearts": return "#DC2626"; // Red
+    case "diamonds": return "#FBBC04"; // Gold/Yellow
+    case "spades": return "#4285F4"; // Blue
+    case "clubs": return "#34A853"; // Green
+  }
 };
 
 const SuitIcon = ({ suit }: { suit: Suit }) => {
-    const color = getSuitColor(suit);
-    switch (suit) {
-        case 'hearts': return <span style={{ color }} className="text-2xl">♥</span>;
-        case 'diamonds': return <span style={{ color }} className="text-2xl">♦</span>;
-        case 'spades': return <span style={{ color }} className="text-2xl">♠</span>;
-        case 'clubs': return <span style={{ color }} className="text-2xl">♣</span>;
-    }
+  const color = getSuitColor(suit);
+  const baseClass = "text-2xl transition-all duration-300 hover:scale-125 hover:drop-shadow-[0_0_8px_currentColor] cursor-default";
+  switch (suit) {
+    case 'hearts': return <span style={{ color }} className={baseClass}>♥</span>;
+    case 'diamonds': return <span style={{ color }} className={baseClass}>♦</span>;
+    case 'spades': return <span style={{ color }} className={baseClass}>♠</span>;
+    case 'clubs': return <span style={{ color }} className={baseClass}>♣</span>;
+  }
 };
+
+// Time unit component for countdown
+const TimeUnit = ({ value, label, isSeconds = false }: { value: number; label: string; isSeconds?: boolean }) => (
+  <div className="flex flex-col items-center">
+    <motion.div
+      key={isSeconds ? value : undefined}
+      initial={isSeconds ? { scale: 1.1, opacity: 0.7 } : false}
+      animate={isSeconds ? { scale: 1, opacity: 1 } : undefined}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="relative"
+    >
+      <span
+        className="text-xl md:text-2xl lg:text-3xl font-bold tabular-nums"
+        style={{
+          textShadow: '0 0 10px rgba(220, 38, 38, 0.6), 0 2px 4px rgba(0,0,0,0.8)'
+        }}
+      >
+        {value.toString().padStart(2, '0')}
+      </span>
+    </motion.div>
+    <span className="text-[10px] md:text-xs text-red-400/70 uppercase tracking-wider mt-1">{label}</span>
+  </div>
+);
 
 const Countdown = () => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -229,37 +253,55 @@ const Countdown = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const formatTime = ({ days, hours, minutes, seconds }: { days: number, hours: number, minutes: number, seconds: number }) => {
-    return `${days}d ${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
-  };
-
   return (
-    <div className="text-xl md:text-2xl text-red-500 tracking-widest animate-pulse border border-red-900/50 px-6 py-2 bg-black/80 backdrop-blur rounded inline-block shadow-[0_0_15px_rgba(255,0,0,0.3)] font-mono">
-      VISA: {formatTime(timeLeft)}
+    <div
+      className="text-red-500 border border-red-900/60 px-4 md:px-6 py-3 md:py-4 bg-black/85 backdrop-blur-md rounded-lg inline-flex items-center gap-1 font-mono"
+      style={{
+        boxShadow: '0 0 20px rgba(180, 20, 20, 0.25), inset 0 1px 0 rgba(255,255,255,0.05)'
+      }}
+    >
+      {/* VISA Label */}
+      <span
+        className="text-xs md:text-sm text-red-400/80 tracking-[0.2em] mr-2 md:mr-4 uppercase font-semibold"
+        style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}
+      >
+        VISA:
+      </span>
+
+      {/* Time Units */}
+      <div className="flex items-center gap-2 md:gap-4">
+        <TimeUnit value={timeLeft.days} label="days" />
+        <span className="text-red-600/50 text-lg md:text-xl font-light">:</span>
+        <TimeUnit value={timeLeft.hours} label="hrs" />
+        <span className="text-red-600/50 text-lg md:text-xl font-light">:</span>
+        <TimeUnit value={timeLeft.minutes} label="min" />
+        <span className="text-red-600/50 text-lg md:text-xl font-light">:</span>
+        <TimeUnit value={timeLeft.seconds} label="sec" isSeconds />
+      </div>
     </div>
   );
 };
 
 // --- Animations ---
 function AnimatedCardWrapper({ children, index }: { children: React.ReactNode; index: number }) {
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-    return (
-        <motion.div
-            ref={ref}
-            initial={{ opacity: 0, y: 80, scale: 0.9 }}
-            animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 80, scale: 0.9 }}
-            transition={{
-                duration: 0.6,
-                delay: index * 0.1,
-                ease: [0.25, 0.46, 0.45, 0.94],
-            }}
-            className="flex justify-center"
-        >
-            {children}
-        </motion.div>
-    );
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 80, scale: 0.9 }}
+      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 80, scale: 0.9 }}
+      transition={{
+        duration: 0.6,
+        delay: index * 0.1,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      }}
+      className="flex justify-center"
+    >
+      {children}
+    </motion.div>
+  );
 }
 
 // --- Modal Component ---
@@ -268,86 +310,86 @@ const GameModal = ({ game, onClose }: { game: Game; onClose: () => void }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-200 font-sans">
-      <div 
+      <div
         className="relative w-full max-w-2xl border border-neutral-700 rounded-lg shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* --- Background Image Layer --- */}
         <div className="absolute inset-0 z-0">
-            {/* The Image */}
-            <img 
-                src={game.image} 
-                alt="" 
-                className="w-full h-full object-cover opacity-60"
-            />
-            {/* The Blur/Darken Overlay */}
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
+          {/* The Image */}
+          <img
+            src={game.image}
+            alt=""
+            className="w-full h-full object-cover opacity-60"
+          />
+          {/* The Blur/Darken Overlay */}
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
         </div>
 
         {/* --- Content Layer (Sitting on top of background) --- */}
         <div className="relative z-10">
-            {/* Header Bar */}
-            <div className={`h-2 w-full ${game.suit === 'hearts' || game.suit === 'diamonds' ? 'bg-red-600' : 'bg-cyan-500'}`} />
-            
-            <div className="p-8 max-h-[80vh] overflow-y-auto">
-            <button 
-                onClick={onClose}
-                className="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl transition-colors"
+          {/* Header Bar */}
+          <div className={`h-2 w-full ${game.suit === 'hearts' || game.suit === 'diamonds' ? 'bg-red-600' : 'bg-cyan-500'}`} />
+
+          <div className="p-8 max-h-[80vh] overflow-y-auto">
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl transition-colors"
             >
-                ✕
+              ✕
             </button>
 
             <div className="flex items-center gap-6 mb-8">
-                <div className="p-6 bg-black border border-neutral-800 rounded shadow-inner">
+              <div className="p-6 bg-black border border-neutral-800 rounded shadow-inner">
                 <SuitIcon suit={game.suit} />
                 <span className="block text-center font-bold mt-2 text-2xl text-white font-mono">{game.rank}</span>
-                </div>
-                <div>
+              </div>
+              <div>
                 <h2 className="text-4xl font-black text-white tracking-tight uppercase" style={{ fontFamily: '"Times New Roman", Times, serif' }}>{game.title}</h2>
                 <span className="inline-block mt-2 px-3 py-1 bg-neutral-800 text-xs uppercase tracking-[0.2em] text-gray-400 rounded font-mono">
-                    {game.difficulty}
+                  {game.difficulty}
                 </span>
-                </div>
+              </div>
             </div>
 
             <div className="space-y-8 text-gray-300 font-sans">
-                <div>
+              <div>
                 <h3 className="text-xs uppercase text-gray-500 mb-2 font-bold tracking-widest border-b border-neutral-800 pb-1">Game Description</h3>
                 <p className="text-lg leading-relaxed">{game.description}</p>
-                </div>
+              </div>
 
-                <div>
+              <div>
                 <h3 className="text-xs uppercase text-gray-500 mb-2 font-bold tracking-widest border-b border-neutral-800 pb-1">Operational Procedure</h3>
                 {/* ADD whitespace-pre-line HERE 👇 */}
                 <p className="text-md leading-relaxed text-gray-400 whitespace-pre-line">
-                    {game.gameplay}
+                  {game.gameplay}
                 </p>
-                </div>
+              </div>
 
-                <div className="p-5 bg-neutral-950 border-l-4 border-red-600 rounded-r">
+              <div className="p-5 bg-neutral-950 border-l-4 border-red-600 rounded-r">
                 <h3 className="text-xs uppercase text-red-500 mb-2 font-bold tracking-widest">Crucial Detail</h3>
                 <p className="italic text-gray-400">{game.twist}</p>
-                </div>
+              </div>
 
-                <div>
+              <div>
                 <h3 className="text-xs uppercase text-gray-500 mb-3 font-bold tracking-widest border-b border-neutral-800 pb-1">Rules</h3>
                 <ul className="space-y-3">
-                    {game.rules.map((rule, idx) => (
+                  {game.rules.map((rule, idx) => (
                     <li key={idx} className="flex items-start gap-3 text-sm text-gray-400 font-mono">
-                        <span className="text-neutral-600 mt-1">▶</span>
-                        {rule}
+                      <span className="text-neutral-600 mt-1">▶</span>
+                      {rule}
                     </li>
-                    ))}
+                  ))}
                 </ul>
-                </div>
+              </div>
 
-                <div className="flex flex-col sm:flex-row justify-between items-center pt-8 border-t border-neutral-800 mt-8 gap-4">
+              <div className="flex flex-col sm:flex-row justify-between items-center pt-8 border-t border-neutral-800 mt-8 gap-4">
                 <span className="text-xs uppercase text-red-600 tracking-wider font-mono">
-                    FATAL CONDITION: {game.gameOver}
+                  FATAL CONDITION: {game.gameOver}
                 </span>
-                </div>
+              </div>
             </div>
-            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -374,8 +416,8 @@ export default function AbyssEventPage() {
   };
 
   return (
-    <div 
-      className="min-h-screen bg-[#010101] text-gray-200 selection:bg-red-900 selection:text-white overflow-x-hidden"
+    <div
+      className="min-h-screen bg-[#030303] text-gray-200 selection:bg-red-900 selection:text-white overflow-x-hidden"
       style={{ fontFamily: '"Times New Roman", Times, serif' }}
     >
       <Head>
@@ -383,7 +425,8 @@ export default function AbyssEventPage() {
       </Head>
 
       {/* --- ADDED STYLE TO HIDE THE DARK MODE BUTTON --- */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .theme-toggle,
         .dark-mode-toggle,
         button[aria-label="Toggle theme"],
@@ -401,128 +444,221 @@ export default function AbyssEventPage() {
 
       {/* HERO SECTION - UPDATED FOR MOBILE AND LAPTOP RESPONSIVENESS */}
       <header className="relative w-full h-[100dvh] flex flex-col items-center justify-center overflow-hidden">
-        
+
         {/* Background Image Container */}
         <div className="absolute inset-0 z-0">
-           <img 
-             src="/abyss.png" 
-             alt="Post-apocalyptic city" 
-             className="w-full h-full object-cover object-center"
-           />
-           {/* Text Readability Overlay */}
-           <div className="absolute inset-0 bg-gradient-to-t from-[#010101] via-black/40 to-black/60" />
-           {/* Texture Overlay */}
-           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay"></div>
-           
-           {/* SEAMLESS BLEND OVERLAY */}
-           <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-t from-[#010101] via-[#010101]/80 to-transparent pointer-events-none" />
+          <img
+            src="/abyss.png"
+            alt="Post-apocalyptic city"
+            className="w-full h-full object-cover object-center"
+          />
+
+          {/* RED SATURATION LAYER - Adds overall red tint (reduced intensity) */}
+          <div className="absolute inset-0 bg-red-900/20 mix-blend-overlay" />
+
+          {/* EDGE VIGNETTE GRADIENT - Lighter, more cinematic feel */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `
+                 radial-gradient(ellipse at center, 
+                   transparent 25%, 
+                   rgba(60, 0, 0, 0.25) 50%, 
+                   rgba(40, 0, 0, 0.45) 70%, 
+                   rgba(25, 0, 0, 0.65) 85%, 
+                   rgba(10, 0, 0, 0.8) 100%
+                 )
+               `
+            }}
+          />
+
+          {/* CORNER VIGNETTE - Softer darkness in corners */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `
+                 radial-gradient(ellipse 70% 70% at 0% 0%, rgba(100, 0, 0, 0.35) 0%, transparent 45%),
+                 radial-gradient(ellipse 70% 70% at 100% 0%, rgba(100, 0, 0, 0.35) 0%, transparent 45%),
+                 radial-gradient(ellipse 70% 70% at 0% 100%, rgba(100, 0, 0, 0.45) 0%, transparent 45%),
+                 radial-gradient(ellipse 70% 70% at 100% 100%, rgba(100, 0, 0, 0.45) 0%, transparent 45%)
+               `
+            }}
+          />
+
+          {/* Text Readability Overlay - Enhanced for small text */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-black/25 to-black/35" />
+
+          {/* Texture Overlay */}
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-15 mix-blend-overlay"></div>
+
+          {/* SEAMLESS BLEND OVERLAY - Bottom fade */}
+          <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-[#050505] via-[#030303]/95 to-transparent pointer-events-none" />
+
+          {/* TOP EDGE FADE - Softer */}
+          <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#120000]/60 via-[#080000]/30 to-transparent pointer-events-none" />
+
+          {/* LEFT EDGE FADE - Softer */}
+          <div className="absolute top-0 left-0 h-full w-24 bg-gradient-to-r from-[#120000]/50 via-[#080000]/20 to-transparent pointer-events-none" />
+
+          {/* RIGHT EDGE FADE - Softer */}
+          <div className="absolute top-0 right-0 h-full w-24 bg-gradient-to-l from-[#120000]/50 via-[#080000]/20 to-transparent pointer-events-none" />
         </div>
 
         <div className="relative z-10 text-center px-4 flex flex-col items-center">
-          
+
           <div className={`${scrolled ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500 mb-12`}>
-             <Countdown />
+            <Countdown />
           </div>
-          
+
           {/* Main Title */}
           <h1 className="flex items-center justify-center tracking-tighter leading-none select-none drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
             <span className={`${geizer.className} text-[8rem] md:text-[12rem] lg:text-[16rem] text-transparent bg-clip-text bg-gradient-to-b from-gray-200 to-gray-500`}>
-                AB
+              AB
             </span>
             <span className={`${geizer.className} text-[8rem] md:text-[12rem] lg:text-[16rem] text-red-600 drop-shadow-[0_0_30px_rgba(220,38,38,0.6)]`}>
-                Y
+              Y
             </span>
             <span className={`${geizer.className} text-[8rem] md:text-[12rem] lg:text-[16rem] text-transparent bg-clip-text bg-gradient-to-b from-gray-200 to-gray-500`}>
-                SS
+              SS
             </span>
           </h1>
-          
-          {/* Tagline */}
-          <p className="-mt-2 md:-mt-6 lg:-mt-8 text-sm md:text-base tracking-[0.3em] md:tracking-[0.5em] text-gray-100 font-bold uppercase drop-shadow-lg py-4 px-8 opacity-80">
+
+          {/* Tagline - Enhanced readability */}
+          <p
+            className="-mt-2 md:-mt-6 lg:-mt-8 text-sm md:text-base tracking-[0.3em] md:tracking-[0.5em] text-gray-100 font-bold uppercase py-4 px-8"
+            style={{
+              textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 4px 16px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.4)'
+            }}
+          >
             THE DEATH STARES BACK
           </p>
 
-          {/* Register Button */}
-          <button 
+          {/* Register Button - Enhanced with pulse animation and refined hover */}
+          <motion.button
             onClick={handleRegister}
-            className="mt-8 px-12 py-4 border-2 border-red-600 text-red-500 font-bold text-sm uppercase tracking-[0.25em] bg-black/40 backdrop-blur-md shadow-[0_0_25px_rgba(220,38,38,0.4)] transition-all duration-300 hover:bg-red-600 hover:text-black hover:shadow-[0_0_50px_rgba(220,38,38,0.8)] hover:scale-105 active:scale-95 animate-in fade-in slide-in-from-bottom-4 duration-1000"
+            className="mt-8 px-10 md:px-12 py-3 md:py-4 border-2 border-red-600/80 text-red-500 font-bold text-sm uppercase tracking-[0.2em] md:tracking-[0.25em] bg-black/50 backdrop-blur-md rounded-sm relative overflow-hidden group"
+            style={{
+              boxShadow: '0 0 25px rgba(180, 30, 30, 0.3), inset 0 1px 0 rgba(255,100,100,0.1)'
+            }}
+            whileHover={{
+              scale: 1.03,
+              boxShadow: '0 0 40px rgba(220, 38, 38, 0.5), 0 0 60px rgba(180, 30, 30, 0.3)'
+            }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            animate={{
+              boxShadow: [
+                '0 0 25px rgba(180, 30, 30, 0.3), inset 0 1px 0 rgba(255,100,100,0.1)',
+                '0 0 35px rgba(220, 38, 38, 0.45), inset 0 1px 0 rgba(255,100,100,0.15)',
+                '0 0 25px rgba(180, 30, 30, 0.3), inset 0 1px 0 rgba(255,100,100,0.1)'
+              ]
+            }}
+            //@ts-ignore
+            transition2={{
+              boxShadow: {
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }
+            }}
           >
-            Register Now
-          </button>
-          
+            {/* Hover background fill */}
+            <span className="absolute inset-0 bg-gradient-to-r from-red-700 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="relative z-10 group-hover:text-white transition-colors duration-300">Register Now</span>
+          </motion.button>
+
         </div>
       </header>
 
       {/* EVENTS GRID SECTION */}
-      <main id="games-grid" className="relative z-10 py-20 px-3 md:px-8 lg:px-16 bg-[#010101]">
-        
+      <main id="games-grid" className="relative z-10 py-20 px-3 md:px-8 lg:px-16 bg-[#030303]">
+
         <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="mb-12 md:mb-16 text-center"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-12 md:mb-16 text-center"
         >
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-400 uppercase tracking-widest">
-                <span className="text-red-600">///</span> Active Games
-            </h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-400 uppercase tracking-widest">
+            <span className="text-red-600">///</span> Active Games
+          </h2>
         </motion.div>
 
         {/* OPTIMIZATION: 
            - grid-cols-2 (Mobile) -> lg:grid-cols-4 (Desktop)
            - gap-3 (Mobile) -> md:gap-8 (Desktop)
+           - Added group hover for dim effect on non-hovered cards
         */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8 max-w-7xl mx-auto">
+        <div className="group/grid grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8 max-w-7xl mx-auto">
           {games.map((game, index) => (
             <AnimatedCardWrapper key={game.id} index={index}>
-                {/* OPTIMIZATION: 
+              {/* OPTIMIZATION: 
                    - CSS Variable for Responsive Height: Mobile: 360px | Desktop: 400px
                    - Passed to TiltedCard props via var()
+                   - Added hover:z-10 for elevation, dim effect for non-hovered cards
                 */}
-                <div className="w-full [--card-height:360px] md:[--card-height:400px]">
-                    <TiltedCard
-                        imageSrc={game.image}
-                        altText={game.title}
-                        captionText={game.title}
-                        containerHeight="var(--card-height)"
-                        containerWidth="100%"
-                        imageHeight="var(--card-height)"
-                        imageWidth="100%"
-                        rotateAmplitude={12}
-                        scaleOnHover={1.05}
-                        showMobileWarning={false}
-                        showTooltip={false}
-                        displayOverlayContent
-                        onClick={() => setSelectedGame(game)}
-                        overlayContent={
-                            <div 
-                                className="w-full p-3 md:p-4 rounded-b-[15px] font-sans"
-                                style={{
-                                    background: "linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 60%, transparent 100%)",
-                                }}
-                            >
-                                <div className="flex items-center gap-2">
-                                    <div className="scale-75 origin-left md:scale-100">
-                                        <SuitIcon suit={game.suit} />
-                                    </div>
-                                    {/* Responsive Text Size: sm on mobile, xl on desktop */}
-                                    <h3 className="text-white font-bold text-sm md:text-xl uppercase tracking-wider truncate" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
-                                        {game.title}
-                                    </h3>
-                                </div>
-                                <div className="mt-1 md:mt-2 flex justify-between items-end border-t border-white/20 pt-2">
-                                    {/* Responsive Text Size: smaller font for difficulty and rank */}
-                                    <span className="text-white/60 text-[10px] md:text-xs font-mono uppercase truncate max-w-[70%]">
-                                        {game.difficulty}
-                                    </span>
-                                    <span className="text-red-500 font-bold text-sm md:text-lg font-mono">
-                                        {game.rank}
-                                    </span>
-                                </div>
-                            </div>
-                        }
-                    />
-                </div>
+              <div className="w-full [--card-height:360px] md:[--card-height:400px] 
+                              transition-all duration-500 ease-out
+                              group-hover/grid:opacity-60 hover:!opacity-100
+                              hover:z-10 hover:-translate-y-2
+                              hover:drop-shadow-[0_20px_40px_rgba(0,0,0,0.7)]">
+                <TiltedCard
+                  imageSrc={game.image}
+                  altText={game.title}
+                  captionText={game.title}
+                  containerHeight="var(--card-height)"
+                  containerWidth="100%"
+                  imageHeight="var(--card-height)"
+                  imageWidth="100%"
+                  rotateAmplitude={12}
+                  scaleOnHover={1.05}
+                  showMobileWarning={false}
+                  showTooltip={false}
+                  displayOverlayContent
+                  onClick={() => setSelectedGame(game)}
+                  overlayContent={
+                    <div
+                      className="w-full p-3 md:p-4 rounded-b-[15px] font-sans backdrop-blur-[2px]"
+                      style={{
+                        background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 50%, transparent 100%)",
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="scale-75 origin-left md:scale-100">
+                          <SuitIcon suit={game.suit} />
+                        </div>
+                        {/* Floating text with enhanced shadows */}
+                        <h3
+                          className="text-white font-bold text-sm md:text-xl uppercase tracking-wider truncate"
+                          style={{
+                            fontFamily: '"Times New Roman", Times, serif',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)'
+                          }}
+                        >
+                          {game.title}
+                        </h3>
+                      </div>
+                      <div className="mt-1 md:mt-2 flex justify-between items-end border-t border-white/10 pt-2">
+                        {/* Floating text for difficulty */}
+                        <span
+                          className="text-white/70 text-[10px] md:text-xs font-mono uppercase truncate max-w-[70%]"
+                          style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+                        >
+                          {game.difficulty}
+                        </span>
+                        {/* Glowing rank */}
+                        <span
+                          className="text-red-500 font-bold text-sm md:text-lg font-mono"
+                          style={{ textShadow: '0 0 10px rgba(220, 38, 38, 0.5), 0 2px 4px rgba(0,0,0,0.8)' }}
+                        >
+                          {game.rank}
+                        </span>
+                      </div>
+                    </div>
+                  }
+                />
+              </div>
             </AnimatedCardWrapper>
           ))}
         </div>
